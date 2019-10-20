@@ -1,0 +1,13 @@
+{
+    "name": "lucky/sidepi",
+    "authors": [
+        {
+            "name": "FarisLucky",
+            "email": "43780471+FarisLucky@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.8",
+        "dompdf/dompdf": "^0.8.3"
+    }
+}

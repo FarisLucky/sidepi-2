@@ -1,0 +1,250 @@
+body {
+  margin: 0px;
+  padding: 0px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* my css style */
+.text-center {
+  text-align: center;
+}
+
+#print_spr small {
+  font-size: 13px;
+}
+
+#print_spr {
+  padding-left: 30px;
+}
+
+.content {
+  margin-bottom: 10px;
+}
+
+.d-inline-block {
+  display: inline-block;
+}
+
+.d-block {
+  display: block;
+}
+
+.logo-kop {
+  display: inline-block;
+  text-align: center;
+  width: 150px;
+}
+
+.img-kop {
+  display: inline-block;
+  width: 100px;
+}
+
+.kop {
+  width: 100%;
+  padding: 5px;
+  height: 130px;
+  /*Chrome,Safari*/
+}
+
+.kop h3::before {
+  content: "";
+  height: 80px;
+  width: 3px;
+  background: #43607e;
+  position: absolute;
+}
+
+.kop hr {
+  width: 650px;
+  text-align: center;
+  background: #43607e;
+}
+
+.kop-header {
+  display: inline-block;
+  margin: 10px 0 10px 0;
+  padding: 5px;
+}
+
+.title-kop {
+  display: inline-block;
+  width: 550px;
+  padding: 0px 10px 0px 10px;
+  border-left: 3px solid #34495e;
+}
+
+.item-title {
+  display: block;
+}
+
+.row {
+  display: inline-block;
+}
+
+.font-weight {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.font-weight-1 {
+  font-weight: 550;
+  font-size: 15px;
+}
+
+.mb-1 {
+  margin-bottom: 10px;
+}
+
+.mr-2 {
+  margin-right: 10px;
+}
+
+.text-indent {
+  text-indent: 10px;
+}
+
+.ml-0 {
+  margin-left: 0;
+  padding: 0;
+}
+
+.mt-2 {
+  margin-top: 5px;
+}
+
+ol.inner {
+  list-style: none;
+}
+
+ol li {
+  margin-bottom: 8px;
+}
+
+ol.list li:last-child {
+  list-style: none;
+}
+
+p {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th {
+  padding: 5px;
+  text-align: center;
+}
+
+table td {
+  padding: 5px 10px;
+}
+
+table img {
+  width: 50px;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+}
+
+.max-width {
+  max-width: 50%;
+}
+
+.max-width-30 {
+  max-width: 30%;
+}
+
+.absolute {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.m-auto {
+  margin-left: 20px;
+}
+
+.width {
+  width: 200px;
+}
+
+.relative {
+  position: relative;
+}
+
+.i {
+  font-style: italic;
+}
+
+.abs {
+  position: absolute;
+}
+
+.f-14 {
+  font-size: 14px;
+}
+
+.green-light {
+  background-color: #4caf50;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.txt-title {
+  font-size: 13px;
+  font-weight: 600px;
+}
+
+.txt-body {
+  font-size: 14px;
+  font-weight: 400px;
+}
+
+.border-0 {
+  border: 0px;
+}
+
+.cover-text {
+  display: inline-block;
+  padding: 10px;
+}
+
+.p-3 {
+  padding: 20px;
+}
+
+.w-tr {
+  width: 180px;
+}
+
+.p-table td {
+  padding: 15px;
+}
+
+.border-table tr,
+td,
+th {
+  border: 1px solid black;
+}
+
+.no-border {
+  border: 0px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+tbody.unborder tr td {
+  border: 0px;
+}

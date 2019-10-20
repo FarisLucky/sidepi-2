@@ -1,0 +1,4 @@
+RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(?:[^/]*/)*([^/.]+\.(?:jpe?g|gif|bmp|png|tiff|css|js))$ /Assets/$1 [R=301,L,NC]
