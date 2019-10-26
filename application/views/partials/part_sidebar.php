@@ -53,27 +53,9 @@ $nama_path = $this->uri->segment('1'); ?>
                                 <li class="nav-item">
                                     <a class="nav-link <?= $nama_path == 'approve' ? 'active' : ''; ?>" href="<?= base_url('approve') ?>">Approve Pembayaran</a>
                                 </li>
-                            <?php } ?>
-
-                            <?php if ($_SESSION['id_akses'] === '2') { ?>
-                                <li class="nav-item">
-                                    <a class="nav-link <?= $nama_path == 'mngapprove' ? 'active' : '' ?>" href="<?= base_url('mngapprove') ?>">Approve Pembayaran</a>
-                                </li>
-                            <?php } ?>
-
-                            <?php if ($_SESSION['id_akses'] === '1') { ?>
                                 <li class="nav-item">
                                     <a class="nav-link <?= $nama_path == 'approvepengeluaran' ? 'active' : '' ?>" href="<?= base_url('approvepengeluaran') ?>">Approve Pengeluaran</a>
                                 </li>
-                            <?php } ?>
-
-                            <?php if ($_SESSION['id_akses'] === '2') { ?>
-                                <li class="nav-item">
-                                    <a class="nav-link <?= $nama_path == 'mngapprovepengeluaran' ? 'active' : '' ?>" href="<?= base_url('mngapprovepengeluaran') ?>">Approve Pengeluaran</a>
-                                </li>
-                            <?php } ?>
-
-                            <?php if ($_SESSION['id_akses'] === '1') { ?>
                                 <li class="nav-item">
                                     <a class="nav-link <?= $nama_path == 'approvepemasukan' ? 'active' : '' ?>" href="<?= base_url('approvepemasukan') ?>">Approve Pemasukan</a>
                                 </li>
@@ -81,10 +63,20 @@ $nama_path = $this->uri->segment('1'); ?>
 
                             <?php if ($_SESSION['id_akses'] === '2') { ?>
                                 <li class="nav-item">
+                                    <a class="nav-link <?= $nama_path == 'mngapprove' ? 'active' : '' ?>" href="<?= base_url('mngapprove') ?>">Approve Pembayaran</a>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $nama_path == 'mngapprovepengeluaran' ? 'active' : '' ?>" href="<?= base_url('mngapprovepengeluaran') ?>">Approve Pengeluaran</a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link <?= $nama_path == 'mngapprovepemasukan' ? 'active' : '' ?>" href="#">Approve Pemasukan</a>
                                 </li>
                             <?php } ?>
 
+                            <?php if (in_array('approvetransaksi', $_SESSION['controllers'])) { ?>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $nama_path == 'approvetransaksi' ? 'active' : '' ?>" href="<?= base_url('approvetransaksi') ?>">Approve Transaksi</a>
+                                </li>
+                            <?php } ?>
                         </ul>
                     </div>
                 </li>

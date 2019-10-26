@@ -354,3 +354,6 @@ table img {
         display: flex!important;
     }
 }
+.span-font span{
+    font-size: 13px!important;
+}

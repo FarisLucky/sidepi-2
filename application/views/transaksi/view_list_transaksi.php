@@ -71,7 +71,7 @@
                         <?php } elseif ($value->status_diterima == 'terima') { ?>
                           <a href="<?= base_url() ?>transaksi/detail/<?= $value->id_transaksi ?>" class="btn btn-sm"><i class="fa fa-info" data-toggle="tooltip" data-placement="bottom" title="Detail"></i></a>
                         <?php } else { ?>
-                          <button class="btn btn-sm btn-danger" id="alasan" data-id="<?= $value->id_transaksi ?>">alasan</button>
+                          <button class="btn btn-sm btn-danger alasan" data-id="<?= $value->id_transaksi ?>">alasan</button>
                         <?php } ?>
                       </td>
                     </tr>
