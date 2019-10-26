@@ -15,11 +15,9 @@
     <!-- page-body-wrapper ends -->
     </div>
 </footer>
-
-<script src="<?= base_url() ?>assets/custom/js/jquery-3.4.1.min.js"></script>
 <!-- End Jquery -->
 <script src="<?= base_url() ?>assets/vendors/js/vendor.bundle.base.js"></script>
-<script src="<?= base_url() ?>assets/vendors/js/vendor.bundle.addons.js"></script>
+<!-- <script src="<?= base_url() ?>assets/vendors/js/vendor.bundle.addons.js"></script> -->
 <!-- endinject -->
 <!-- Plugin js for this page-->
 <!-- End plugin js for this page-->
@@ -42,10 +40,9 @@
             placeholder: '-- Pilih Options --',
             width: 'element'
         });
-        $('.datepicker').datepicker({
-            format: 'mm/dd/yyyy',
-        });
     });
+    $('.active').parents('.collapse').addClass('show');
+    $('.active').parents('.nav-item').addClass('active');
 </script>
 <!-- End custom js for this page-->
 <script src="<?= base_url() . 'assets/custom/js/indexing.js' ?>"></script>

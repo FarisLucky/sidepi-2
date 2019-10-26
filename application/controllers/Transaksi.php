@@ -14,7 +14,6 @@ class Transaksi extends CI_Controller
     {
         $params = ['id_user' => $this->session->userdata('id_user'), 'id_properti' => $this->session->userdata('id_properti')];
         $data['title'] = 'Transaksi';
-
         $per_page = 10;
         if ($num != 0) {
             $num = ($num - 1) * $per_page;
@@ -28,8 +27,6 @@ class Transaksi extends CI_Controller
     public function tambah()
     {
         $data['title'] = 'Transaksi';
-
-        $data['img'] = getCompanyLogo();
         $data['konsumen'] = $this->modelapp->getData("*", "konsumen", ['status_konsumen' => 'ck', 'id_user' => $_SESSION['id_user']])->result();
         $data['unit'] = $this->modelapp->getData("*", "unit", ["id_properti" => $_SESSION['id_properti'], "status_unit" => "bt"])->result();
         $data['type'] = $this->modelapp->getData("*", "type_bayar")->result_array();
@@ -39,8 +36,6 @@ class Transaksi extends CI_Controller
     {
         $this->load->helper('date');
         $data['title'] = 'Detail Transaksi';
-
-        $data['img'] = getCompanyLogo();
         $data['transaksi'] = $this->modelapp->getData('*', 'tbl_transaksi', ['id_transaksi' => $id])->row();
         $id_transaksi = $data['transaksi']->id_transaksi;
         $id_konsumen = $data['transaksi']->id_konsumen;
@@ -134,7 +129,7 @@ class Transaksi extends CI_Controller
             $this->tambah();
         } else {
             $input = $this->inputData();
-            $total_transaksi = 0;
+            $total_transaksi = 0; // variable untuk total seluruh transaksi
             if ($_POST["radio_tj"] == "tidak_masuk") {
                 $input += ["tanda_jadi" => $this->input->post("radio_tj", true)];
                 $total_transaksi = $input["total_kesepakatan"];
@@ -142,7 +137,6 @@ class Transaksi extends CI_Controller
                 $input += ["tanda_jadi" => $this->input->post("radio_tj", true)];
                 $total_transaksi = (int) ($input["total_kesepakatan"] - $input["total_tanda_jadi"]);
             }
-            // !Validasi Cicilan
 
             if (!empty($_POST["periode_Um"]) && !empty($_POST["txt_angsuran"])) {
                 $total_um = 0;
@@ -178,24 +172,8 @@ class Transaksi extends CI_Controller
 
             $this->db->trans_start(); //Start Transaction Database auth concept
 
-            $query = $this->modelapp->insertData($input, "transaksi");
-            $get_id_insert = $this->db->insert_id();
-            $detail = [$this->input->post('txt_nama_tambah', true), $this->input->post('txt_volume_tambah', true), $this->input->post('txt_satuan_tambah', true), $this->input->post('txt_harga_tambah', true)];
-            $data['detail'] = $this->reArray($detail);
-            // Detail Transaksi
-            if (!empty($data['detail'])) {
-                $detail_transaksi = [];
-                foreach ($data['detail'] as $key => $value) {
-                    if (!empty($key)) {
-                        $detail_transaksi['penambahan'] = $value[0];
-                        $detail_transaksi['volume'] = $value[1];
-                        $detail_transaksi['satuan'] = $value[2];
-                        $detail_transaksi['total'] = $value[3];
-                        $detail_transaksi['transaksi'] = $get_id_insert;
-                        $this->modelapp->insertData($detail_transaksi, "detail_transaksi");
-                    }
-                }
-            }
+            $this->modelapp->insertData($input, "transaksi"); //insert data transaksi
+            $get_id_insert = $this->db->insert_id(); //ambil id data transaksi
 
             // Uang Tanda Jadi 
             if (!empty($input["total_tanda_jadi"])) {
@@ -276,7 +254,7 @@ class Transaksi extends CI_Controller
 
             $this->db->trans_start(); //Start Transaction Database Auth Concept
 
-            $query = $this->modelapp->updateData($input, "transaksi", ["id_transaksi" => $get_id_insert]);
+            $this->modelapp->updateData($input, "transaksi", ["id_transaksi" => $get_id_insert]);
 
             $detail = [$this->input->post('txt_nama_tambah', true), $this->input->post('txt_volume_tambah', true), $this->input->post('txt_satuan_tambah', true), $this->input->post('txt_harga_tambah', true)];
             $detail_array['detail'] = $this->reArray($detail);
@@ -422,8 +400,10 @@ class Transaksi extends CI_Controller
         $this->form_validation->set_rules('txt_kesepakatan', 'Kesepakatan', 'trim|required|max_length[11]');
         $this->form_validation->set_rules('txt_tanda_jadi', 'Tanda Jadi', 'trim|required|max_length[11]');
         $this->form_validation->set_rules('txt_type_pembayaran', 'Total Transaksi', 'trim|required');
+        $this->form_validation->set_rules('periode_um', 'Total Transaksi', 'trim|required');
         $this->form_validation->set_rules('tgl_tanda_jadi', 'Tanggal Tanda Jadi', 'trim|required');
         $this->form_validation->set_rules('tgl_pembayaran', 'Tanggal Pembayaran', 'trim|required');
+        $this->form_validation->set_rules('tgl_uang_muka', 'Tanggal Pembayaran', 'trim|required');
     }
     private function reArray($data)
     {
@@ -446,12 +426,11 @@ class Transaksi extends CI_Controller
             'total_kesepakatan' => str_replace('.', '', $this->input->post('txt_kesepakatan', true)),
             "total_tanda_jadi" => str_replace('.', '', $this->input->post('txt_tanda_jadi', true)),
             'type_bayar' => $this->input->post('txt_type_pembayaran', true),
-            'status_transaksi' => "s",
+            'status_transaksi' => "0",
             'kunci' => 'u',
             'tgl_tanda_jadi' => $this->input->post('tgl_tanda_jadi', true),
             'tgl_uang_muka' => $this->input->post('tgl_uang_muka', true),
             'tgl_cicilan' => $this->input->post('tgl_pembayaran', true),
-            'total_tambahan' => str_replace('.', '', $this->input->post('txt_total_tambahan', true)),
             'id_user' => $this->session->userdata('id_user')
         ];
     }
@@ -553,6 +532,14 @@ class Transaksi extends CI_Controller
         $config['num_tag_close'] = '</span></li>';
 
         $this->pagination->initialize($config);
+    }
+    public function dataTolak()
+    {
+        $data = $this->input->post('data', true);
+        if (!empty($data)) {
+            $query = $this->modelapp->getData('deskripsi_tolak', 'transaksi', ['id_transaksi' => $data])->row_array();
+            echo json_encode(['status' => true, 'data' => $query]);
+        }
     }
 }
 /* End of file Controllername.php */

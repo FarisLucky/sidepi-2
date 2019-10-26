@@ -1,5 +1,6 @@
 <!-- partial Main Menu -->
-<?php $user = get_where('user', ['id_user' => $this->session->userdata['id_user']])->row(); ?>
+<?php $user = get_where('user', ['id_user' => $this->session->userdata['id_user']])->row();
+$nama_path = $this->uri->segment('1'); ?>
 <div class="container-fluid page-body-wrapper">
 
     <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -16,7 +17,7 @@
                     </div>
                 </div>
             </li>
-            <li class="nav-item">
+            <li class="nav-item <?= $this->uri->segment('1') == 'dashboard' ? 'active' : '' ?>">
                 <?php $link;
                 if ($_SESSION['id_akses'] === '1') {
 
@@ -50,37 +51,37 @@
 
                             <?php if ($_SESSION['id_akses'] === '1') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('approve') ?>">Approve Pembayaran</a>
+                                    <a class="nav-link <?= $nama_path == 'approve' ? 'active' : ''; ?>" href="<?= base_url('approve') ?>">Approve Pembayaran</a>
                                 </li>
                             <?php } ?>
 
                             <?php if ($_SESSION['id_akses'] === '2') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('mngapprove') ?>">Approve Pembayaran</a>
+                                    <a class="nav-link <?= $nama_path == 'mngapprove' ? 'active' : '' ?>" href="<?= base_url('mngapprove') ?>">Approve Pembayaran</a>
                                 </li>
                             <?php } ?>
 
                             <?php if ($_SESSION['id_akses'] === '1') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('approvepengeluaran') ?>">Approve Pengeluaran</a>
+                                    <a class="nav-link <?= $nama_path == 'approvepengeluaran' ? 'active' : '' ?>" href="<?= base_url('approvepengeluaran') ?>">Approve Pengeluaran</a>
                                 </li>
                             <?php } ?>
 
                             <?php if ($_SESSION['id_akses'] === '2') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('mngapprovepengeluaran') ?>">Approve Pengeluaran</a>
+                                    <a class="nav-link <?= $nama_path == 'mngapprovepengeluaran' ? 'active' : '' ?>" href="<?= base_url('mngapprovepengeluaran') ?>">Approve Pengeluaran</a>
                                 </li>
                             <?php } ?>
 
                             <?php if ($_SESSION['id_akses'] === '1') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('approvepemasukan') ?>">Approve Pemasukan</a>
+                                    <a class="nav-link <?= $nama_path == 'approvepemasukan' ? 'active' : '' ?>" href="<?= base_url('approvepemasukan') ?>">Approve Pemasukan</a>
                                 </li>
                             <?php } ?>
 
                             <?php if ($_SESSION['id_akses'] === '2') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#">Approve Pengeluaran</a>
+                                    <a class="nav-link <?= $nama_path == 'mngapprovepemasukan' ? 'active' : '' ?>" href="#">Approve Pemasukan</a>
                                 </li>
                             <?php } ?>
 
@@ -90,7 +91,7 @@
             <?php } ?>
 
             <?php if ($_SESSION['id_akses'] === '1') { ?>
-                <li class="nav-item">
+                <li class="nav-item <?= $nama_path == 'profilperusahaan' ? 'active' : '' ?>">
                     <a class="nav-link" href="<?= base_url('profilperusahaan') ?>">
                         <i class="menu-icon mdi mdi-settings"></i>
                         <span class="menu-title">Setting</span>
@@ -110,31 +111,31 @@
 
                             <?php if (in_array('properti', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('properti') ?>">Data Properti</a>
+                                    <a class="nav-link <?= $nama_path == 'properti' ? 'active' : '' ?>" href="<?= base_url('properti') ?>">Data Properti</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('unitproperti', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('unitproperti') ?>">Data Unit</a>
+                                    <a class="nav-link <?= $nama_path == 'unitproperti' ? 'active' : '' ?>" href="<?= base_url('unitproperti') ?>">Data Unit</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('rab', $_SESSION['controllers']) && $_SESSION['id_akses'] !== '1') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('rab/unit') ?>">RAB Unit</a>
+                                    <a class="nav-link <?= $nama_path == 'rab' && $this->uri->segment('2') == 'unit' ? 'active' : '' ?>" href="<?= base_url('rab/unit') ?>">RAB Unit</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('rab', $_SESSION['controllers']) && $_SESSION['id_akses'] !== '1') { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('rab/properti') ?>">RAB Properti</a>
+                                    <a class="nav-link <?= $nama_path == 'rab' && $this->uri->segment('2') == 'properti' ? 'active' : '' ?>" href="<?= base_url('rab/properti') ?>">RAB Properti</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('kartukontrol', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('kartukontrol') ?>">Kartu Kontrol</a>
+                                    <a class="nav-link <?= $nama_path == 'kartukontrol' ? 'active' : '' ?>" href="<?= base_url('kartukontrol') ?>">Kartu Kontrol</a>
                                 </li>
                             <?php } ?>
                         </ul>
@@ -152,13 +153,13 @@
                     <div class="collapse" id="pembayaran">
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('pembayaran/tandajadi') ?>">Tanda Jadi</a>
+                                <a class="nav-link <?= $nama_path == 'pembayaran' && $this->uri->segment('2') == 'tandajadi' ? 'active' : '' ?>" href="<?= base_url('pembayaran/tandajadi') ?>">Tanda Jadi</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('pembayaran/uangmuka') ?>">Uang Muka</a>
+                                <a class="nav-link  <?= $nama_path == 'pembayaran' && $this->uri->segment('2') == 'uangmuka' ? 'active' : '' ?>" href="<?= base_url('pembayaran/uangmuka') ?>">Uang Muka</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('pembayaran/cicilan') ?>">Cicilan</a>
+                                <a class="nav-link  <?= $nama_path == 'pembayaran' && $this->uri->segment('2') == 'cicilan' ? 'active' : '' ?>" href="<?= base_url('pembayaran/cicilan') ?>">Cicilan</a>
                             </li>
                         </ul>
                     </div>
@@ -166,7 +167,7 @@
             <?php } ?>
 
             <?php if (in_array('transaksi', $_SESSION['controllers']) && $_SESSION['id_akses'] !== '1') { ?>
-                <li class="nav-item">
+                <li class="nav-item  <?= $nama_path == 'transaksi' ? 'active' : '' ?>">
                     <a class="nav-link" href="<?= base_url('transaksi') ?>">
                         <i class="menu-icon mdi mdi-cart"></i>
                         <span class="menu-title">Transaksi</span>
@@ -186,49 +187,49 @@
 
                             <?php if (in_array('kelolauser', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('kelolauser') ?>">Data User</a>
+                                    <a class="nav-link <?= $nama_path == 'kelolauser' ? 'active' : '' ?>" href="<?= base_url('kelolauser') ?>">Data User</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('rekening', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('rekening') ?>">Data Rekening</a>
+                                    <a class="nav-link <?= $nama_path == 'rekening' ? 'active' : '' ?>" href="<?= base_url('rekening') ?>">Data Rekening</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('item', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link hello" href="<?= base_url('item') ?>">Data Kelompok</a>
+                                    <a class="nav-link <?= $nama_path == 'item' ? 'active' : '' ?>" href="<?= base_url('item') ?>">Data Kelompok</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('persyaratan', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('persyaratan') ?>">Data Persyaratan</a>
+                                    <a class="nav-link <?= $nama_path == 'persyaratan' ? 'active' : '' ?>" href="<?= base_url('persyaratan') ?>">Data Persyaratan</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('pengeluaran', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('pengeluaran') ?>">Data Pengeluaran</a>
+                                    <a class="nav-link <?= $nama_path == 'pengeluaran' ? 'active' : '' ?>" href="<?= base_url('pengeluaran') ?>">Data Pengeluaran</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('pemasukan', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('pemasukan') ?>">Data Pemasukan</a>
+                                    <a class="nav-link <?= $nama_path == 'pemasukan' ? 'active' : '' ?>" href="<?= base_url('pemasukan') ?>">Data Pemasukan</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('calonkonsumen', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('calonkonsumen') ?>">Data Calon</a>
+                                    <a class="nav-link <?= $nama_path == 'calonkonsumen' ? 'active' : '' ?>" href="<?= base_url('calonkonsumen') ?>">Data Calon</a>
                                 </li>
                             <?php } ?>
 
                             <?php if (in_array('followcalon', $_SESSION['controllers'])) { ?>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="<?= base_url('followcalon') ?>">Data Follow Calon</a>
+                                    <a class="nav-link <?= $nama_path == 'followcalon' ? 'active' : '' ?>" href="<?= base_url('followcalon') ?>">Data Follow Calon</a>
                                 </li>
                             <?php } ?>
                         </ul>
@@ -247,49 +248,49 @@
 
                         <?php if (in_array('laporanpengeluaran', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporanpengeluaran') ?>">Laporan Pengeluaran</a>
+                                <a class="nav-link <?= $nama_path == 'laporanpengeluaran' ? 'active' : '' ?>" href="<?= base_url('laporanpengeluaran') ?>">Laporan Pengeluaran</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('laporanpemasukan', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporanpemasukan') ?>">Laporan Pemasukan</a>
+                                <a class="nav-link <?= $nama_path == 'laporanpemasukan' ? 'active' : '' ?>" href="<?= base_url('laporanpemasukan') ?>">Laporan Pemasukan</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('laporanpembayaran', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporanpembayaran') ?>">Laporan Pembayaran</a>
+                                <a class="nav-link <?= $nama_path == 'laporanpembayaran' ? 'active' : '' ?>" href="<?= base_url('laporanpembayaran') ?>">Laporan Pembayaran</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('laporankonsumen', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporankonsumen') ?>">Laporan Konsumen</a>
+                                <a class="nav-link <?= $nama_path == 'laporankonsumen' ? 'active' : '' ?>" href="<?= base_url('laporankonsumen') ?>">Laporan Konsumen</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('laporancalon', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporancalon') ?>">Laporan Calon</a>
+                                <a class="nav-link <?= $nama_path == 'laporancalon' ? 'active' : '' ?>" href="<?= base_url('laporancalon') ?>">Laporan Calon</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('laporanunit', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporanunit') ?>">Laporan Unit</a>
+                                <a class="nav-link <?= $nama_path == 'laporanunit' ? 'active' : '' ?>" href="<?= base_url('laporanunit') ?>">Laporan Unit</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('listtransaksi', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('listtransaksi') ?>">Laporan Transaksi</a>
+                                <a class="nav-link <?= $nama_path == 'listtransaksi' ? 'active' : '' ?>" href="<?= base_url('listtransaksi') ?>">Laporan Transaksi</a>
                             </li>
                         <?php } ?>
 
                         <?php if (in_array('laporanmarketing', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?= base_url('laporanmarketing') ?>">Laporan Marketing</a>
+                                <a class="nav-link <?= $nama_path == 'laporanmarketing' ? 'active' : '' ?>" href="<?= base_url('laporanmarketing') ?>">Laporan Marketing</a>
                             </li>
                         <?php } ?>
                     </ul>

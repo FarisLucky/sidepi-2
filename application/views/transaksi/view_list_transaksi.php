@@ -9,8 +9,7 @@
         </div>
       </div>
     </div>
-    <br>
-    <div class="card">
+    <div class="card mt-2">
       <div class="card-body">
         <div class="row">
           <div class="col-sm-6">
@@ -33,9 +32,9 @@
                   <th>Total Kesepakatan</th>
                   <th>Pembayaran</th>
                   <th>Tanggal Transaksi</th>
-                  <th>Status</th>
+                  <th>Status Terima</th>
+                  <th>Status Transaksi</th>
                   <th>Aksi</th>
-                  <th>Lock</th>
                 </thead>
                 <tbody>
                   <?php $no = $row + 1;
@@ -60,28 +59,21 @@
                       <td><?= $value->type_bayar ?></td>
                       <td><?= $value->tgl_transaksi ?></td>
                       <td>
-                        <div class="badge badge-primary"><?= $status ?></div>
+                        <div class="badge badge-info"><?= empty($value->status_diterima) ? 'Pending' : ($value->status_diterima == 'terima' ? 'diterima' : 'ditolak') ?></div>
                       </td>
                       <td>
-                        <?php if (($value->kunci == "u") && ($value->status_transaksi == "s")) { ?>
-                          <a href="<?= base_url() ?>transaksi/detail/<?= $value->id_transaksi ?>" class="btn btn-sm"><i class="fa fa-info" data-toggle="tooltip" data-placement="bottom" title="Detail"></i></a>
+                        <div class="badge badge-primary"><?= $value->status_transaksi == '0' ? 'proses' : 'selesai' ?></div>
+                      </td>
+                      <td>
+                        <?php if (empty($value->status_diterima)) { ?>
                           <a onclick="deleteItem('<?= base_url('transaksi/delete/' . $value->id_transaksi) ?>')" class="delete-transaksi"><i class="fa fa-trash text-danger" data-toggle="tooltip" data-placement="bottom" title="Hapus"></i></a>
                           <a href="<?= base_url() ?>transaksi/edit/<?= $value->id_transaksi ?>" class="btn btn-sm"><i class="fa fa-pencil-square text-info" data-toggle="tooltip" data-placement="bottom" title="Edit"></i></a>
-                        <?php } elseif (($value->kunci == "u") && ($value->status_transaksi == "p")) { ?>
+                        <?php } elseif ($value->status_diterima == 'terima') { ?>
                           <a href="<?= base_url() ?>transaksi/detail/<?= $value->id_transaksi ?>" class="btn btn-sm"><i class="fa fa-info" data-toggle="tooltip" data-placement="bottom" title="Detail"></i></a>
-                          <a href="<?= base_url() ?>transaksi/edit/<?= $value->id_transaksi ?>" class="btn btn-sm"><i class="fa fa-pencil-square text-info" data-toggle="tooltip" data-placement="bottom" title="Edit"></i></a>
                         <?php } else { ?>
-                          <a href="<?= base_url() ?>transaksi/detail/<?= $value->id_transaksi ?>" class="btn btn-sm"><i class="fa fa-info" data-toggle="tooltip" data-placement="bottom" title="Detail"></i></a>
-                          <a href="<?= base_url() ?>transaksi/printspr/<?= $value->id_transaksi ?>" class="btn btn-sm" data-id="<?= $value->id_transaksi ?>"><i class="fa fa-print text-warning" data-toggle="tooltip" data-placement="bottom" title="Print SPR "></i></a>
+                          <button class="btn btn-sm btn-danger" id="alasan" data-id="<?= $value->id_transaksi ?>">alasan</button>
                         <?php } ?>
                       </td>
-                      <td>
-                        <?php if ($value->kunci != "l") { ?>
-                          <a onclick="setItem('<?= base_url('transaksi/lock/' . $value->id_transaksi) ?>','Lock')" class="btn btn-sm lock" data-id="<?= $value->id_transaksi ?>"><i class="fa fa-unlock text-danger lock" data-toggle="tooltip" data-placement="bottom" title="Lock ?"></i></a></td>
-                    <?php } else { ?>
-                      <i class="fa fa-lock text-success" data-toggle="tooltip" data-placement="bottom" title="Lock ?"></i>
-                      </td>
-                    <?php } ?>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
@@ -94,6 +86,21 @@
             <?php echo $this->pagination->create_links(); ?>
           </nav>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alasan Ditolak</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="body-modal">/p>
       </div>
     </div>
   </div>

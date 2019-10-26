@@ -21,6 +21,7 @@ $users = get_where('user', ['id_user' => $this->session->userdata['id_user']])->
     <!-- End plugin css for this page -->
     <!-- inject:css -->
     <link rel="stylesheet" href="<?= base_url() ?>assets/css/style.min.css">
+
     <!-- Custom css -->
     <link rel="stylesheet" href="<?= base_url() ?>assets/custom/css/custom_css.css">
     <!-- Toastr Css -->
@@ -34,7 +35,6 @@ $users = get_where('user', ['id_user' => $this->session->userdata['id_user']])->
         var csrf_name = '<?= $this->security->get_csrf_token_name() ?>'
         var csrf_val = '<?= $this->security->get_csrf_hash() ?>'
         var time;
-        console.log(<?php echo $_SERVER['REQUEST_URI'] ?>)
     </script>
 </head>
 
