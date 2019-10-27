@@ -71,17 +71,6 @@
               </div>
             </div>
           </div>
-          <div class="row">
-            <div class="col-sm-12">
-              <div class="form-group">
-                <div class="form-check form-check-flat">
-                  <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="lock" value="l">pembayaran akan dilock
-                    otomatis</label>
-                </div>
-              </div>
-            </div>
-          </div>
           <hr>
           <div class="row">
             <div class="col-sm-12">

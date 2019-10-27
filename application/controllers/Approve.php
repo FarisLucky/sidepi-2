@@ -13,14 +13,20 @@ class Approve extends CI_Controller
     }
     public function index($num = 0)
     {
-        $this->load->helper('date');
         $data['title'] = 'Approve Pembayaran';
-        $data['approve_bayar'] = $this->modelapp->getData("*", "tbl_detail_pembayaran", ["status_owner" => "p"], 'id_detail', 'DESC')->result();
         $per_page = 10;
         if ($num != 0) {
             $num = ($num - 1) * $per_page;
         }
-        $data['approve_bayar'] = $this->modelapp->getData('*', 'tbl_detail_pembayaran', ["status_owner" => "p"], 'id_detail', 'ASC', $per_page, $num)->result();
+        $select = '*';
+        $tbl = 'tbl_detail_pembayaran';
+        $where = ["status_diterima" => NULL];
+        if (isset($_SESSION['id_properti'])) {
+            $where += ['id_properti' => $_SESSION['id_properti']];
+        }
+        $order_by = 'id_detail';
+        $order_tipe = 'ASC';
+        $data['approve_bayar'] = $this->modelapp->getData($select, $tbl, $where, $order_by, $order_tipe, $per_page, $num)->result_array();
         $data['row'] = $num;
         $this->pagination();
         $this->pages("approve/view_approve_pembayaran", $data);
@@ -37,24 +43,30 @@ class Approve extends CI_Controller
                 $this->session->set_flashdata('error', 'Jumlah Bayar terlalu besar');
                 redirect('approve');
             } else {
+
+                $this->db->trans_start(); //Database Transacation
                 $hutang = $data_bayar['hutang'] - $data_detail['jumlah_bayar'];
                 $ttl_bayar = $data_bayar['total_bayar'] + $data_detail['jumlah_bayar'];
-                $this->modelapp->updateData(['status_owner' => 'sl'], 'detail_pembayaran', ['id_detail' => $data_detail['id_detail']]);
-                $query_update = $this->modelapp->updateData(['hutang' => $hutang, 'total_bayar' => $ttl_bayar], 'pembayaran', ['id_pembayaran' => $data_detail['id_pembayaran']]);
-                if ($query_update) {
-                    $data_status = $this->modelapp->getData('status_owner,status_manager', 'detail_pembayaran', ['id_detail' => $data_detail['id_detail']])->row_array();
-                    if ($data_status['status_owner'] == 'sl') {
-                        $data_pembayaran = $this->modelapp->getData('hutang,jenis_pembayaran,id_transaksi', 'pembayaran', ['id_pembayaran' => $data_detail['id_pembayaran']])->row_array();
-                        if ($data_pembayaran['hutang'] == '0') {
-                            $this->modelapp->updateData(['status' => 'sb'], 'pembayaran', ['id_pembayaran' => $data_detail['id_pembayaran']]);
-                            $this->ubahStatus($data_detail['id_pembayaran'], $data_pembayaran['jenis_pembayaran'], $data_pembayaran['id_transaksi']);
-                        }
-                        $this->session->set_flashdata('success', 'Data berhasil disimpan');
-                        redirect('approve');
-                    } else {
-                        $this->session->set_flashdata('success', 'Data berhasil disimpan');
-                        redirect('approve');
-                    }
+                $data_update_detail = ['status_diterima' => 'terima', 'diterima_oleh' => $_SESSION['id_user']];
+                $where_detail = ['id_detail' => $data_detail['id_detail']];
+                //Update Detail Pembayaran
+                $this->modelapp->updateData($data_update_detail, 'detail_pembayaran', $where_detail);
+                //Update Hutang dan Total Bayar di Pembayaran
+                $this->modelapp->updateData(['hutang' => $hutang, 'total_bayar' => $ttl_bayar], 'pembayaran', ['id_pembayaran' => $data_detail['id_pembayaran']]);
+                //Ambil Data Pembayaran lagi untuk status pembayaran di tabel transaksi
+                $data_pembayaran = $this->modelapp->getData('hutang,jenis_pembayaran,id_transaksi', 'pembayaran', ['id_pembayaran' => $data_detail['id_pembayaran']])->row_array();
+                if ($data_pembayaran['hutang'] == '0') {
+                    $data_update = ['status' => 'sb'];
+                    $this->modelapp->updateData($data_update, 'pembayaran', ['id_pembayaran' => $data_detail['id_pembayaran']]);
+                }
+                $this->db->trans_complete(); // End of Transaction Database Auth concept
+
+                if ($this->db->trans_status() === FALSE) {
+                    $this->session->set_flashdata("failed", "Gagal disimpan");
+                    redirect('approve');
+                } else {
+                    $this->session->set_flashdata('success', 'Data berhasil disimpan');
+                    redirect('approve');
                 }
             }
         } else {
@@ -63,13 +75,16 @@ class Approve extends CI_Controller
         }
     }
 
-    public function reject($id)
+    public function reject()
     {
-        $escp_id = $id;
-        $get_data = $this->modelapp->getData('id_detail,id_pembayaran,jumlah_bayar', 'detail_pembayaran', ['id_detail' => $escp_id]);
+        $id_detail = $this->input->post('input_hidden', true);
+        $deskripsi_tolak = $this->input->post('penolakan', true);
+        $get_data = $this->modelapp->getData('id_detail,id_pembayaran,jumlah_bayar', 'detail_pembayaran', ['id_detail' => $id_detail]);
         if ($get_data->num_rows() > 0) {
             $rs_detail = $get_data->row_array();
-            $sql_reject = $this->modelapp->updateData(['status_owner' => 's'], 'detail_pembayaran', ['id_detail' => $rs_detail['id_detail']]);
+            $data_update = ['status_diterima' => 'tolak', 'deskripsi_tolak' => $deskripsi_tolak, 'diterima_oleh' => $_SESSION['id_user']];
+            $where = ['id_detail' => $rs_detail['id_detail']];
+            $sql_reject = $this->modelapp->updateData($data_update, 'detail_pembayaran', $where);
             if ($sql_reject) {
                 $this->session->set_flashdata('success', 'Data berhasil diubah');
                 redirect('approve');
@@ -77,21 +92,6 @@ class Approve extends CI_Controller
         } else {
             $this->session->set_flashdata('failed', 'Data tidak ditemukan');
             redirect('approve');
-        }
-    }
-
-    private function ubahStatus($id_pembayaran, $jenis_pembayaran, $transaksi)
-    {
-        $data_status = $this->modelapp->getData('COUNT(id_pembayaran) as total', 'pembayaran', ['id_transaksi' => $transaksi, 'jenis_pembayaran' => $jenis_pembayaran])->row_array();
-        $total_lunas = $this->modelapp->getData('COUNT(id_pembayaran) as total', 'pembayaran', ['id_transaksi' => $transaksi, 'jenis_pembayaran' => $jenis_pembayaran, 'status' => 'sb'])->row_array();
-        if ($data_status['total'] == $total_lunas['total']) {
-            if ($jenis_pembayaran == '1') {
-                $this->modelapp->updateData(['status_tj' => 's'], 'transaksi', ['id_transaksi' => $transaksi]);
-            } elseif ($jenis_pembayaran == '2') {
-                $this->modelapp->updateData(['status_um' => 's'], 'transaksi', ['id_transaksi' => $transaksi]);
-            } else {
-                $this->modelapp->updateData(['status_ccl' => 's'], 'transaksi', ['id_transaksi' => $transaksi]);
-            }
         }
     }
 

@@ -32,52 +32,36 @@
                   <th>No</th>
                   <th>Tanggal buat</th>
                   <th>Jumlah Bayar</th>
-                  <th>Status Owner</th>
-                  <th>Status Manager</th>
+                  <th>Status Diterima</th>
                   <th>Bukti</th>
                   <th>Aksi</th>
                 </thead>
                 <tbody>
-
                   <?php $no = $row + 1;
                   if (empty($detail)) {
                     echo "<tr><td class='text-center' colspan='100%'><h5>Data Kosong</h5></td></tr>";
                   }
-                  foreach ($detail as $key => $value) :
-                    if ($value['bukti_bayar'] != '') {
-                      $img = '<img src="' . base_url('assets/uploads/images/pembayaran/' . $value['bukti_bayar']) . '">';
-                    } else {
-                      $img = '<i>Belum Upload</i>';
-                    }
-                    $url = base_url('pembayaran/');
-                    if ($value['status_owner'] == 's') {
-
-                      $button = '<a href=' . base_url("pembayaran/ubahbayar/" . $value['id_detail']) . ' class="btn btn-icons btn-inverse-info"><i class="fa fa-edit"></i></a><button class="btn btn-icons btn-inverse-danger mx-2" onclick="deleteItem(' . "'{$url}hapus/{$value['id_detail']}'" . ')"><i class="fa fa-trash"></i></button><button type="button" class="btn btn-icons btn-inverse-warning" onclick="setItem(' . "'{$url}paylock/{$value['id_detail']}','lock'" . ')"><i class="fa fa-lock"></i></button>';
-                    } elseif ($value['status_owner'] == 'p' || $value['status_manager'] == 'p') {
-
-                      $button = "<i>Menunggu Approve</i>";
-                    } else {
-                      $button = '<a href="' . base_url('pembayaran/printdata/' . $value['id_detail']) . '" class="btn btn-icons btn-inverse-warning mr-1" ><i class="fa fa-print"></i></a>';
-                    } ?>
-
+                  foreach ($detail as $key => $value) {
+                    $img = ($value['bukti_bayar'] != '') ? '<img src="' . base_url('assets/uploads/images/pembayaran/' . $value['bukti_bayar']) . '">' : '<i>Belum Upload</i>';
+                    ?>
                     <tr>
                       <td><?= $no ?></td>
-                      <td>
-                        <?php $date = DateTime::createFromFormat('Y-m-d H:i:s', $value['tgl_bayar']);
-                          echo tanggal($date->format('d'), $date->format('m'), $date->format('Y')) . ' ' . $date->format('H:i:s')  ?>
-                      </td>
+                      <td><?= date('d-m-Y H:i:s', strtotime($value['tgl_bayar'])) ?></td>
                       <td><?= number_format($value['jumlah_bayar'], 2, ',', '.') ?></td>
-                      <td>
-                        <?= $value['status_owner'] == 's' ? '-' : ($value['status_owner'] == 'p' ? 'pending' : 'selesai') ?>
-                      </td>
-                      <td>
-                        <?= $value['status_manager'] == 's' ? '-' : ($value['status_manager'] == 'p' ? 'pending' : 'selesai') ?>
-                      </td>
+                      <td><span class="badge badge-danger"><?= $value['status_diterima'] == 'terima' ? 'diterima' : ($value['status_diterima'] == 'tolak' ? 'Ditolak' : 'tunggu disetujui') ?></span></td>
                       <td><?= $img ?></td>
-                      <td><?= $button ?></td>
+                      <td>
+                        <?php if (empty($value['status_diterima'])) { ?>
+                          <a href="<?= base_url('pembayaran/ubahbayar/' . $value['id_detail']) ?>" class="btn btn-icons btn-inverse-info"><i class="fa fa-edit"></i></a><button class="btn btn-icons btn-inverse-danger mx-2" onclick="deleteItem('<?= base_url('pembayaran/hapus/' . $value['id_detail']) ?>')"><i class="fa fa-trash"></i></button>
+                        <?php } elseif ($value['status_diterima'] == 'terima') { ?>
+                          <a href="<?= base_url('pembayaran/printdata/' . $value['id_detail']) ?>" target="blank" class="btn btn-sm btn-warning" data-id="<?= $value['id_detail'] ?>">print</a>
+                        <?php } else { ?>
+                          <button class="btn btn-sm btn-danger alasan_di_history" data-id="<?= $value['id_detail'] ?>">alasan</button>
+                        <?php } ?>
+                      </td>
                     </tr>
                   <?php $no++;
-                  endforeach;  ?>
+                  }  ?>
                 </tbody>
               </table>
             </div>
@@ -126,6 +110,21 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="modal_history">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alasan Ditolak</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="body-modal">/p>
       </div>
     </div>
   </div>

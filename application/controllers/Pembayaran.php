@@ -35,8 +35,12 @@ class Pembayaran extends CI_Controller
         if ($num != 0) {
             $num = ($num - 1) * $per_page;
         }
-        $data['tanda_jadi'] = $this->modelapp->getDataLike('*', 'tbl_pembayaran', $search, 'id_pembayaran', 'ASC', $per_page, $num, $where)->result_array();
-        $url = $this->modelapp->getDataLike('id_pembayaran', 'tbl_pembayaran', $search, 'id_pembayaran', 'ASC', '', '', $where)->num_rows();
+        $select = '*';
+        $tbl = 'tbl_pembayaran';
+        $order_by = 'id_pembayaran';
+        $order_tipe = 'ASC';
+        $data['tanda_jadi'] = $this->modelapp->getDataLike($select, $tbl, $search, $order_by, $order_tipe, $per_page, $num, $where)->result_array();
+        $url = $this->modelapp->getDataLike('id_pembayaran', $tbl, $search, $order_by, $order_tipe, '', '', $where)->num_rows();
         $base = base_url('pembayaran/tandajadi/');
         $data['row'] = $num;
         $this->pagination($base, $url);
@@ -62,8 +66,12 @@ class Pembayaran extends CI_Controller
         if ($num != 0) {
             $num = ($num - 1) * $per_page;
         }
-        $data['uang_muka'] = $this->modelapp->getData('*', 'tbl_pembayaran', $where, 'id_pembayaran', 'ASC', $per_page, $num)->result_array();
-        $url = $this->modelapp->getData('id_pembayaran', 'tbl_pembayaran', $where)->num_rows();
+        $select = '*';
+        $tbl = 'tbl_pembayaran';
+        $order_by = 'id_pembayaran';
+        $order_tipe = 'ASC';
+        $data['uang_muka'] = $this->modelapp->getData($select, $tbl, $where, $order_by, $order_tipe, $per_page, $num)->result_array();
+        $url = $this->modelapp->getData('id_pembayaran', $tbl, $where)->num_rows();
         $base = base_url('pembayaran/uangmuka/');
         $data['row'] = $num;
         $this->pagination($base, $url);
@@ -121,7 +129,6 @@ class Pembayaran extends CI_Controller
     }
     public function history($id, $num = 0)
     {
-        $this->load->helper('date');
         $data['title'] = "History Pembayaran";
         $per_page = 10;
         if ($num != 0) {
@@ -151,41 +158,41 @@ class Pembayaran extends CI_Controller
                 $this->session->set_flashdata('error', 'jumlah bayar terlalu besar');
                 $this->bayar($id);
             } else {
-                if (isset($_POST['lock'])) {
-                    if ($_POST['lock'] == 'l') {
-                        $input += ['status_owner' => 'p', 'status_manager' => 'p'];
-                        $data_pending = $this->modelapp->getData('id_detail', 'detail_pembayaran', ['id_pembayaran' => $id, 'status_owner' => 'p']);
-                        if ($data_pending->num_rows() > 0) {
-                            $this->session->set_flashdata('failed', 'Tidak bisa di lock, Menunggu approve pembayaran lainnya');
-                            redirect('pembayaran/bayar/' . $id);
-                            return false;
+                $data_detail = $this->modelapp->getData('id_detail', 'detail_pembayaran', ['id_pembayaran' => $id, 'status_diterima' => NULL]);
+                if ($data_detail->num_rows() > 0) {
+                    $this->session->set_flashdata('failed', 'Menunggu terima pembayaran sebelumnya');
+                    redirect('pembayaran/bayar/' . $id);
+                    exit();
+                } else {
+                    $input += ['id_pembayaran' => $id];
+                    $config = $this->imageInit('./assets/uploads/images/pembayaran/');
+                    $this->load->library('upload', $config);
+                    if ($_FILES['txt_bukti']['name'] != '') {
+                        if ($this->upload->do_upload('txt_bukti')) {
+                            $img = $this->upload->data();
+                            $input += ['bukti_bayar' => $img['file_name']];
+                            $sql = $this->modelapp->insertData($input, 'detail_pembayaran');
+                            if ($sql) {
+                                $this->session->set_flashdata('success', 'Data berhasil ditambahkan');
+                                redirect('pembayaran/history/' . $id);
+                            } else {
+                                $this->session->set_flashdata('failed', 'Data gagal ditambahkan');
+                                redirect('pembayaran/history/' . $id);
+                            }
+                        } else {
+                            $error = $this->upload->display_errors();
+                            $this->session->set_flashdata('error', $error);
+                            $this->bayar($id);
                         }
                     } else {
-                        $input += ['status_owner' => 's', 'status_manager' => 's'];
-                    }
-                }
-                $input += ['id_pembayaran' => $id];
-                $config = $this->imageInit('./assets/uploads/images/pembayaran/');
-                $this->load->library('upload', $config);
-                if ($_FILES['txt_bukti']['name'] != '') {
-                    if ($this->upload->do_upload('txt_bukti')) {
-                        $img = $this->upload->data();
-                        $input += ['bukti_bayar' => $img['file_name']];
                         $sql = $this->modelapp->insertData($input, 'detail_pembayaran');
                         if ($sql) {
                             $this->session->set_flashdata('success', 'Data berhasil ditambahkan');
                             redirect('pembayaran/history/' . $id);
+                        } else {
+                            $this->session->set_flashdata('failed', 'Data gagal ditambahkan');
+                            redirect('pembayaran/history/' . $id);
                         }
-                    } else {
-                        $error = $this->upload->display_errors();
-                        $this->session->set_flashdata('error', $error);
-                        $this->bayar($id);
-                    }
-                } else {
-                    $sql = $this->modelapp->insertData($input, 'detail_pembayaran');
-                    if ($sql) {
-                        $this->session->set_flashdata('success', 'Data berhasil ditambahkan');
-                        redirect('pembayaran/history/' . $id);
                     }
                 }
             }
@@ -251,10 +258,15 @@ class Pembayaran extends CI_Controller
         $input = $id;
         $get_detail = $this->modelapp->getData('id_detail,id_pembayaran', 'detail_pembayaran', ['id_detail' => $input]);
         $result = $get_detail->row();
-        if ($get_detail->num_rows()) {
-            $delete = $this->modelapp->deleteData(['id_detail' => $result->id_detail], 'detail_pembayaran');
+        if ($get_detail->num_rows() > 0) {
+            $where = ['id_detail' => $result->id_detail];
+            $tbl = 'detail_pembayaran';
+            $delete = $this->modelapp->deleteData($where, $tbl);
             if ($delete) {
                 $this->session->set_flashdata('success', 'Data berhasil dihapus');
+                redirect('pembayaran/history/' . $result->id_pembayaran);
+            } else {
+                $this->session->set_flashdata('failed', 'Data gagal dihapus');
                 redirect('pembayaran/history/' . $result->id_pembayaran);
             }
         } else {
@@ -457,6 +469,15 @@ class Pembayaran extends CI_Controller
         $config['num_tag_close'] = '</span></li>';
 
         $this->pagination->initialize($config);
+    }
+
+    public function dataTolak()
+    {
+        $data = $this->input->post('data', true);
+        if (!empty($data)) {
+            $query = $this->modelapp->getData('deskripsi_tolak', 'detail_pembayaran', ['id_detail' => $data])->row_array();
+            echo json_encode(['status' => true, 'data' => $query]);
+        }
     }
 }
 

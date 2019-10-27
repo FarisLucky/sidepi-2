@@ -5,6 +5,44 @@
         <div class="row">
           <div class="col-sm-12">
             <h4 class="dark txt_title d-inline-block mt-2">Approve Pembayaran</h4>
+            <hr>
+            <div class="border-left-color span-font">
+              <div class="flex-column">
+                <div class="d-flex flex-row justify-content-between p-2">
+                  <h5 class="border-bottom border-secondary">Format Tabel</h5>
+                </div>
+                <div class="border-bottom border-secondary d-flex flex-row justify-content-between p-2">
+                  <span>Tgl Bayar</span>
+                  <span></span>
+                  <span>Pembuat</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Nama Pembayaran</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Nama Konsumen</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Nama Unit</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Total Tagihan</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Total Bayar</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Total Hutang</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>No Rekening</span>
+                </div>
+                <div class="d-flex flex-row justify-content-start p-2">
+                  <span>Jumlah Bayar Sekarang</span>
+                  <i class="ml-5">Bukti Bayar</i>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -17,18 +55,7 @@
               <table class="table table-hover table-striped">
                 <thead class="table-primary">
                   <th>No</th>
-                  <th>Pembayaran</th>
-                  <th>Properti</th>
-                  <th>Unit</th>
-                  <th>Jumlah Bayar</th>
-                  <th>Rekening</th>
-                  <th>Status Manager</th>
-                  <th>Realisasi</th>
-                  <th>Hutang</th>
-                  <th>Tanggal Bayar</th>
-                  <th>Bukti</th>
-                  <th>Pembuat</th>
-                  <th>Aksi</th>
+                  <th>Detail Pembayaran</th>
                 </thead>
                 <tbody>
                   <?php $no = $row + 1;
@@ -36,35 +63,50 @@
                     echo "<tr><td class='text-center' colspan='100%'><h5>Data Kosong</h5></td></tr>";
                   }
                   foreach ($approve_bayar as $key => $value) {
-                    if ($value->bukti_bayar != '') {
-                      $img = '<a href="' . base_url('assets/uploads/images/pembayaran/' . $value->bukti_bayar) . '" data-lightbox="data' . $value->id_detail . '"><img src="' . base_url('assets/uploads/images/pembayaran/' . $value->bukti_bayar) . '"></a>';
+                    if ($value['bukti_bayar'] != '') {
+                      $img = '<a href="' . base_url('assets/uploads/images/pembayaran/' . $value['bukti_bayar']) . '" data-lightbox="data' . $value['id_detail'] . '">Bukti Bayar</a>';
                     } else {
                       $img = '<i>Belum Upload</i>';
                     }
                     ?>
                     <tr>
                       <td><?= $no ?></td>
-                      <td><?= $value->nama_pembayaran ?></td>
-                      <td><?= $value->nama_properti ?></td>
-                      <td><?= $value->nama_unit ?></td>
-                      <td> <?= number_format($value->jumlah_bayar, 2, ',', '.') ?></td>
-                      <td><?= $value->no_rekening . " " . $value->bank ?></td>
-                      <td><span class="badge badge-info"><?= $value->status_manager == 's' ? '-' : ($value->status_manager == 'p' ? 'pending' : 'selesai'); ?></span>
-                      </td>
-                      <td><?= number_format($value->total_bayar, 2, ',', '.') ?></td>
-                      <td><?= number_format($value->hutang, 2, ',', '.') ?></td>
                       <td>
-                        <?php $date = DateTime::createFromFormat('Y-m-d H:i:s', $value->tgl_bayar);
-                          echo tanggal($date->format('d'), $date->format('m'), $date->format('Y')) . ' ' . $date->format('H:i:s') ?>
-                      </td>
-                      <td><?= $img ?>
-                      <td><?php echo $value->nama_lengkap; ?></td>
-                      </td>
-                      <td>
-                        <button type="button" class="btn btn-icons btn-inverse-primary ml-2" onclick="setItem('<?= base_url('approve/accept/' . $value->id_detail) ?>','Terima')">
-                          <i class="fa fa-check"></i></button>
-                        <button type="button" class="btn btn-icons btn-inverse-danger" onclick="setItem('<?= base_url('approve/reject/' . $value->id_detail) ?>','Tolak')">
-                          <i class="fa fa-ban"></i></button>
+                        <div class="flex-column">
+                          <div class="border-bottom border-secondary d-flex flex-row justify-content-between p-2">
+                            <span><?= date('d-m-Y H:i:s', strtotime($value['tgl_bayar'])) ?></span>
+                            <span></span>
+                            <span><?= ucfirst($value['nama_pembuat']) ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span><?= ucfirst($value['nama_konsumen']) ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span><?= ucfirst($value['nama_unit']) ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span>Rp. <?= number_format($value['total_tagihan'], 2, ',', '.') ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span>Rp. <?= number_format($value['total_bayar'], 2, ',', '.') ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span>Rp. <?= number_format($value['hutang'], 2, ',', '.') ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span><?= $value['no_rekening'] ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <span>Rp. <?= number_format($value['jumlah_bayar'], 2, ',', '.') ?></span>
+                            <span class="ml-5"><?= $img ?></span>
+                          </div>
+                          <div class="d-flex flex-row justify-content-start p-2">
+                            <button type="button" class="btn btn-icons btn-inverse-primary" onclick="setItem('<?= base_url('approve/accept/' . $value['id_detail']) ?>','Terima')">
+                              <i class="fa fa-check"></i></button>
+                            <button type="button" class="btn btn-icons btn-inverse-danger mx-2 modal_tolak" data-id="<?= $value['id_detail'] ?>">
+                              <i class="fa fa-ban"></i></button>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   <?php $no++;
@@ -79,6 +121,30 @@
             <?php echo $this->pagination->create_links(); ?>
           </nav>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alasan Ditolak</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="<?= base_url('approve/reject') ?>" method="post">
+          <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+          <input type="hidden" name="input_hidden" id="input_hidden">
+          <div class="form-group">
+            <label for="">Deskripsi ditolak</label>
+            <textarea name="penolakan" cols="30" rows="10" class="form-control"></textarea>
+          </div>
+          <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i>Simpan</button>
+          <button type="reset" class="btn btn-sm btn-secondary"><i class="fa fa-refresh"></i>Reset</button>
+        </form>
       </div>
     </div>
   </div>

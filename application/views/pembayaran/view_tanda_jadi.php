@@ -41,8 +41,9 @@
               <table class="table table-hover text-center">
                 <thead class="table-primary">
                   <th>No</th>
+                  <th>Konsumen</th>
                   <th>Pembayaran</th>
-                  <th>Nama Unit</th>
+                  <th>Unit</th>
                   <th>Status</th>
                   <th>Tagihan</th>
                   <th>Aksi</th>
@@ -55,6 +56,7 @@
                   foreach ($tanda_jadi as $key => $value) { ?>
                     <tr>
                       <td><?= $no ?></td>
+                      <td><?= ucfirst($value['nama_lengkap']) ?></td>
                       <td><?= $value['nama_pembayaran'] ?></td>
                       <td><?= $value['nama_unit'] ?></td>
                       <td><span class="badge badge-primary"><?= $value['status'] == 'b' ? 'belum bayar' : 'sudah bayar' ?><span></td>

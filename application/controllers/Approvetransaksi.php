@@ -33,11 +33,17 @@ class Approvetransaksi extends CI_Controller
         $get_transaksi = $this->modelapp->getData("id_transaksi", "transaksi", ["id_transaksi" => $id_transaksi]);
         if ($get_transaksi->num_rows() > 0) {
             $data_transaksi = $get_transaksi->row_array();
+
+            $this->db->trans_start(); //Start Database Transaction atau Transactional Database concept
             $update = ['status_diterima' => 'terima', 'diterima_oleh' => $_SESSION['id_user']];
             $tbl = 'transaksi';
             $where = ['id_transaksi' => $data_transaksi['id_transaksi']];
-            $query_transaksi = $this->modelapp->updateData($update, $tbl, $where); // query update transaksi (status diterima)
-            if ($query_transaksi) {
+            $this->modelapp->updateData($update, $tbl, $where); // query update transaksi (status diterima)
+            $update_bayar = ['status' => 'b']; //status diubah dari SEMENTARA to BELUM BAYAR;
+            $this->modelapp->updateData($update_bayar, 'pembayaran', ['id_transaksi' => $data_transaksi['id_transaksi']]); //Query update pembayaran
+            $this->db->trans_complete(); // Database Transaction
+
+            if ($this->db->trans_status() === TRUE) {
                 $this->session->set_flashdata('success', 'Data berhasil disimpan');
                 redirect('approvetransaksi');
             } else {
