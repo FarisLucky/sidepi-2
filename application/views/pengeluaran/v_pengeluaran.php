@@ -5,6 +5,9 @@
         <div class="row">
           <div class="col-sm-12">
             <h4 class="dark txt_title d-inline-block mt-2">Kelola Pengeluaran</h4>
+            <?php if (isset($_SESSION['pengeluaran'])) { ?>
+              <a href="<?= base_url('pengeluaran/resetproperti') ?>" class="mx-2 text-primary">Pilih Properti</a>
+            <?php } ?>
           </div>
         </div>
       </div>
@@ -49,8 +52,7 @@
                   <th>Harga</th>
                   <th>Total Harga</th>
                   <th>Bukti</th>
-                  <th>Owner</th>
-                  <th>Manager</th>
+                  <th>Status</th>
                   <th>Aksi</th>
                 </thead>
                 <tbody>
@@ -60,11 +62,7 @@
                     echo "<tr><td class='text-center' colspan='100%'><h5>Data Kosong</h5></td></tr>";
                   }
                   foreach ($pengeluaran as $p) {
-                    if (!empty($p->bukti_kwitansi)) {
-                      $img = '<img src="' . base_url('assets/uploads/images/pengeluaran/' . $p->bukti_kwitansi) . '"';
-                    } else {
-                      $img = '<i style="font-size:13px;">Belum Upload Bukti</i>';
-                    }
+                    $img = (!empty($p->bukti_kwitansi)) ? $img = '<a href="' . base_url('assets/uploads/images/pengeluaran/' . $p->bukti_kwitansi) . '" data-lightbox="data' . $p->id_pengeluaran . '"><img src="' . base_url('assets/uploads/images/pengeluaran/' . $p->bukti_kwitansi) . '"' : '<i style="font-size:12px;">Belum Upload</i>';
                     ?>
                     <tr>
                       <td><?php echo $no++ ?></td>
@@ -75,24 +73,18 @@
                       <td><?php echo number_format($p->harga_satuan, 2, ',', '.') ?></td>
                       <td><?php echo number_format($p->total_harga, 2, ',', '.') ?></td>
                       <td><?= $img ?></td>
-                      <td><?= $p->status_owner == 's' ? '-' : ($p->status_owner == 'p' ? 'pending' : 'selesai') ?>
-                      </td>
-                      <td><?= $p->status_manager == 's' ? '-' : ($p->status_manager == 'p' ? 'pending' : 'selesai') ?>
-                      </td>
+                      <td><span class="badge badge-danger"><?= $p->status_diterima == 'terima' ? 'diterima' : ($p->status_diterima == 'tolak' ? 'ditolak' : 'pending') ?></span></td>
                       <td>
-                        <?php if ($p->status_owner == 's') { ?>
+                        <?php if ($p->status_diterima == NULL) { ?>
 
                           <a href="<?= base_url() . 'pengeluaran/ubah/' . $p->id_pengeluaran ?>" class="btn btn-icons btn-inverse-primary"><i class="fa fa-edit"></i></a>
                           <button onclick="deleteItem('<?= base_url('pengeluaran/hapus/' . $p->id_pengeluaran) ?>')" class="btn btn-icons btn-inverse-danger"><i class="fa fa-trash"></i></button>
-                          <button class="btn btn-icons btn-inverse-warning" onclick="setItem('<?= base_url('pengeluaran/lock/' . $p->id_pengeluaran) ?>','lock')"><i class="fa fa-lock"></i></button>
-                        <?php } elseif ($p->status_owner == 'sl' && $p->status_manager == 'sl') { ?>
-                          <i>-</i>
+                        <?php } elseif ($p->status_diterima == 'tolak') { ?>
+                          <button class="btn btn-sm btn-danger alasan_pengeluaran" data-id="<?= $p->id_pengeluaran ?>">alasan</button>
                         <?php } else { ?>
-
-                          <i style="font-size: 13px;">Menunggu Approve</i>
+                          <a href="<?= base_url('pengeluaran/printdata/' . $p->id_pengeluaran) ?>" class="btn btn-sm btn-warning" target="blank">print</a>
                         <?php } ?>
                       </td>
-
                     </tr>
                   <?php } ?>
                 </tbody>
@@ -105,6 +97,22 @@
             <?php echo $this->pagination->create_links(); ?>
           </nav>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal_history">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alasan Ditolak</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="body-modal">/p>
       </div>
     </div>
   </div>

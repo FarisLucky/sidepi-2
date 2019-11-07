@@ -4,7 +4,7 @@
       <div class="card-body p-4">
         <div class="row">
           <div class="col-sm-12">
-            <h4 class="dark txt_title d-inline-block mt-2">History Transaksi</h4>
+            <h4 class="dark txt_title d-inline-block mt-2">History Pembayaran</h4>
           </div>
         </div>
       </div>

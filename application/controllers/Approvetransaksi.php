@@ -30,7 +30,7 @@ class Approvetransaksi extends CI_Controller
     public function terima($id)
     {
         $id_transaksi = $id;
-        $get_transaksi = $this->modelapp->getData("id_transaksi", "transaksi", ["id_transaksi" => $id_transaksi]);
+        $get_transaksi = $this->modelapp->getData("id_transaksi,id_konsumen,id_unit", "transaksi", ["id_transaksi" => $id_transaksi]);
         if ($get_transaksi->num_rows() > 0) {
             $data_transaksi = $get_transaksi->row_array();
 
@@ -39,6 +39,8 @@ class Approvetransaksi extends CI_Controller
             $tbl = 'transaksi';
             $where = ['id_transaksi' => $data_transaksi['id_transaksi']];
             $this->modelapp->updateData($update, $tbl, $where); // query update transaksi (status diterima)
+            $this->modelapp->updateData(['status_konsumen' => 'k'], 'konsumen', ['id_konsumen' => $data_transaksi['id_konsumen']]); // query update status Konsumen (konsumen)
+            $this->modelapp->updateData(['status_unit' => 'b'], 'unit', ['id_unit' => $data_transaksi['id_unit']]); // query update status unit (booking)
             $update_bayar = ['status' => 'b']; //status diubah dari SEMENTARA to BELUM BAYAR;
             $this->modelapp->updateData($update_bayar, 'pembayaran', ['id_transaksi' => $data_transaksi['id_transaksi']]); //Query update pembayaran
             $this->db->trans_complete(); // Database Transaction
@@ -51,8 +53,7 @@ class Approvetransaksi extends CI_Controller
                 redirect('approvetransaksi');
             }
         } else {
-            $this->session->set_flashdata('failed', 'Data Transaksi tidak ditemukan');
-            redirect('approvetransaksi');
+            $this->load->view('errors/error_503');
         }
     }
     public function tolak()
@@ -66,11 +67,13 @@ class Approvetransaksi extends CI_Controller
             $get_transaksi = $this->modelapp->getData("id_transaksi", "transaksi", ["id_transaksi" => $id_transaksi]);
             if ($get_transaksi->num_rows() > 0) {
                 $data_transaksi = $get_transaksi->row_array();
+
                 $update = ['status_diterima' => 'tolak', 'deskripsi_tolak' => $input_deskripsi, 'diterima_oleh' => $_SESSION['id_user']];
                 $tbl = 'transaksi';
                 $where = ['id_transaksi' => $data_transaksi['id_transaksi']];
-                $query_transaksi = $this->modelapp->updateData($update, $tbl, $where); // query update transaksi (status diterima)
-                if ($query_transaksi) {
+                $transaksi = $this->modelapp->updateData($update, $tbl, $where); // query update transaksi (status diterima)
+
+                if ($transaksi) {
                     $this->session->set_flashdata('success', 'Data berhasil disimpan');
                     redirect('approvetransaksi');
                 } else {
@@ -78,8 +81,7 @@ class Approvetransaksi extends CI_Controller
                     redirect('approvetransaksi');
                 }
             } else {
-                $this->session->set_flashdata('failed', 'Data Transaksi tidak ditemukan');
-                redirect('approvetransaksi');
+                $this->load->view('errors/error_503');
             }
         }
     }

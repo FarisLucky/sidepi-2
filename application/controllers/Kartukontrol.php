@@ -83,9 +83,8 @@ class Kartukontrol extends CI_Controller
         if ($num != 0) {
             $num = ($num - 1) * $per_page;
         }
-        $where += ['status_transaksi !=' => 's'];
+        $where += ['id_properti' => $id];
         $data["title"] = "Kartu Kontrol";
-        $data['properti'] = $this->modelapp->getData('*', 'properti')->result();
         $data['transaksi'] = $this->modelapp->getDataLike('*', "tbl_transaksi", $search, 'id_transaksi', 'ASC', $per_page, $num, $where)->result_array();
         $data['unit'] = $this->modelapp->getData('id_unit,nama_unit', "unit", ['id_properti' => $id, 'status_unit !=' => 'bt'])->result_array();
         $data['row'] = $num;
@@ -112,13 +111,19 @@ class Kartukontrol extends CI_Controller
         if ($num != 0) {
             $num = ($num - 1) * $per_page;
         }
+
         $where = ["id_transaksi" => $id];
+        $data_join = ['user' => 'transaksi.id_user = user.id_user', 'konsumen' => 'transaksi.id_konsumen = konsumen.id_konsumen', 'unit' => 'transaksi.id_unit = unit.id_unit'];
+        $select = 'id_transaksi,total_tanda_jadi,tanda_jadi,user.nama_lengkap as pembuat,total_uang_muka,periode_uang_muka,total_cicilan,periode_cicilan,total_kesepakatan,tgl_transaksi,status_transaksi,konsumen.nama_lengkap as nama_konsumen,unit.nama_unit,unit.harga_unit';
         $data["detail_kontrol"] = $this->modelapp->getData("*", "tbl_pembayaran", $where)->result();
-        $data["transaksi"] = $this->modelapp->getData('*', "tbl_transaksi", ["id_transaksi" => $id])->row();
-        $data["bayar_tj"] = $this->modelapp->getData("SUM(total_bayar) as tanda_jadi", "tbl_pembayaran", ["id_transaksi" => $id, 'jenis_pembayaran' => 1])->row();
-        $data["bayar_um"] = $this->modelapp->getData("SUM(total_bayar) as uang_muka", "tbl_pembayaran", ["id_transaksi" => $id, 'jenis_pembayaran' => 2])->row();
-        $data["bayar_cicilan"] = $this->modelapp->getData("SUM(total_bayar) as cicilan", "tbl_pembayaran", ["id_transaksi" => $id, 'jenis_pembayaran' => 3])->row();
+        $data["transaksi"] = $this->modelapp->getJoinData($select, "transaksi", $data_join, $where)->row();
+
+        // Ambil Realisasi Bayar;
+        $data["bayar_tj"] = $this->modelapp->getData("SUM(total_bayar) as tanda_jadi", "pembayaran", ["id_transaksi" => $id, 'jenis_pembayaran' => 1])->row();
+        $data["bayar_um"] = $this->modelapp->getData("SUM(total_bayar) as uang_muka", "pembayaran", ["id_transaksi" => $id, 'jenis_pembayaran' => 2])->row();
+        $data["bayar_cicilan"] = $this->modelapp->getData("SUM(total_bayar) as cicilan", "pembayaran", ["id_transaksi" => $id, 'jenis_pembayaran' => 3])->row();
         $data["realisasi"] = $this->modelapp->getData("SUM(hutang) as hutang,SUM(total_bayar) as pemasukan", "tbl_pembayaran", ["id_transaksi" => $id])->row();
+        // !ambil Realisasi Bayar;
         $data['row'] = $num;
         $base = base_url('kartukontrol/detail/');
         $url = $this->modelapp->getData('*', "tbl_transaksi", $where)->num_rows();
@@ -131,7 +136,7 @@ class Kartukontrol extends CI_Controller
         $data['title'] = "History Pembayaran";
         $data["id_pembayaran"] = $id;
         $data["pembayaran"] = $this->modelapp->getData("*", "pembayaran", ["id_pembayaran" => $id])->row_array();
-        $data["detail"] = $this->modelapp->getData("*", "detail_pembayaran", ["id_pembayaran" => $id, 'status_owner' => 'sl'])->result_array();
+        $data["detail"] = $this->modelapp->getData("*", "detail_pembayaran", ["id_pembayaran" => $id, 'status_diterima' => 'terima'])->result_array();
         $this->pages("kartu_kontrol/view_history", $data);
     }
 
@@ -140,14 +145,15 @@ class Kartukontrol extends CI_Controller
         $get_data = $this->modelapp->getData('id_transaksi', 'tbl_transaksi', ['id_transaksi' => $id]);
         if ($get_data->num_rows() > 0) {
             $data_transaksi = $get_data->row_array();
-            $query_update = $this->modelapp->updateData(['status_transaksi' => 'sl'], 'transaksi', ['id_transaksi' => $data_transaksi['id_transaksi']]);
+            $where =  ['id_transaksi' => $data_transaksi['id_transaksi']];
+            $data_update = ['status_transaksi' => '1'];
+            $query_update = $this->modelapp->updateData($data_update, 'transaksi', $where);
             if ($query_update) {
                 $this->session->set_flashdata('success', 'Data berhasil diubah');
                 redirect('kartukontrol/detail/' . $data_transaksi['id_transaksi']);
             }
         } else {
-            $this->session->set_flashdata('failed', 'Data Tidak Ditemukan');
-            redirect('kartukontrol/detail/' . $id);
+            $this->load->view('errors/error_503');
         }
     }
 
@@ -165,6 +171,57 @@ class Kartukontrol extends CI_Controller
             $data['html'] = $html;
         }
         return $this->output->set_output(json_encode($data));
+    }
+
+    public function hapus($id)
+    {
+        $input = $id;
+        $get_data = $this->modelapp->getData('id_transaksi,id_properti,id_unit,id_konsumen', 'tbl_transaksi', ['id_transaksi' => $input]);
+        if ($get_data->num_rows() > 0) {
+            $rs_transaksi = $get_data->row_array();
+            $rs_dp = $this->modelapp->getData('SUM(total_bayar) as total', 'pembayaran', ['id_transaksi' => $rs_transaksi['id_transaksi'], 'jenis_pembayaran' => '2'])->row_array();
+            if ($rs_dp['total'] != '0') {
+                redirect('kartukontrol/datahapus/' . $rs_transaksi['id_transaksi']);
+            } else {
+
+                $this->db->trans_start(); //Start Transaction Database Auth Concept
+                $this->modelapp->deleteData(['id_transaksi' => $rs_transaksi['id_transaksi']], 'transaksi');
+                $this->modelapp->updateData(['status_unit' => 'bt'], 'unit', ['id_unit' => $rs_transaksi['id_unit']]);
+                $this->modelapp->deleteData(['id_konsumen' => $rs_transaksi['id_konsumen']], 'konsumen');
+
+                $this->db->trans_complete(); // End Transaction Database Auth Concept
+
+                if ($this->db->trans_status() === FALSE) {
+                    $this->session->set_flashdata("failed", "Gagal dihapus");
+                    redirect("listtransaksi");
+                } else {
+                    $this->session->set_flashdata("success", "Berhasil dihapus");
+                    redirect("listtransaksi");
+                }
+            }
+        } else {
+            $this->load->view('errors/error_503');
+        }
+    }
+
+    public function dataHapus($input)
+    {
+        $this->load->library('form_validation');
+        $id = $input;
+        $data["title"] = "Detail Transaksi";
+        $transaksi = $this->modelapp->getData('id_transaksi,nama_lengkap,id_unit,nama_unit', 'tbl_transaksi', ['id_transaksi' => $id])->row_array();
+        $data['dp'] = $this->modelapp->getData('SUM(total_bayar) as total', 'pembayaran', ['id_transaksi' => $transaksi['id_transaksi'], 'jenis_pembayaran' => '2'])->row_array();
+        $total = ($data['dp']['total'] * 10) / 100;
+        $data['pengeluaran'] = [
+            'nama_pengeluaran' => 'Dp dari ' . $transaksi['nama_lengkap'],
+            'volume' => '1',
+            'id_unit' => $transaksi['id_unit'],
+            'nama_unit' => $transaksi['nama_unit'],
+            'satuan' => 'transaksi',
+            'harga_satuan' => $total,
+            'id_transaksi' => $transaksi['id_transaksi']
+        ];
+        $this->pages('laporan/transaksi/tambah_pengeluaran', $data);
     }
 
     // Pages
@@ -204,6 +261,14 @@ class Kartukontrol extends CI_Controller
         $config['num_tag_close'] = '</span></li>';
 
         $this->pagination->initialize($config);
+    }
+    public function dataTolak()
+    {
+        $data = $this->input->post('data', true);
+        if (!empty($data)) {
+            $query = $this->modelapp->getData('deskripsi_tolak', 'transaksi', ['id_transaksi' => $data])->row_array();
+            echo json_encode(['status' => true, 'data' => $query]);
+        }
     }
 }
 

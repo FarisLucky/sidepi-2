@@ -45,9 +45,8 @@ class Dashboard extends CI_Controller
             $data['title'] = "Dashboard";
             $data['total_transaksi'] = $this->modelapp->getData('COUNT(id_transaksi) as total', 'transaksi', ['MONTH(tgl_transaksi)' => date('m')])->row_array();
             $data['total_konsumen'] = $this->modelapp->getData('COUNT(id_konsumen) as total', 'konsumen', ['MONTH(tgl_buat)' => date('m'), 'status_konsumen' => 'ck'])->row_array();
-            $data['total_pengeluaran'] = $this->modelapp->getData('SUM(total_harga) as total', 'pengeluaran', ['MONTH(tgl_buat)' => date('m'), 'status_owner' => 'sl', 'status_manager' => 'sl'])->row_array();
+            $data['total_pengeluaran'] = $this->modelapp->getData('SUM(total_harga) as total', 'pengeluaran', ['MONTH(tgl_buat)' => date('m')])->row_array();
             $data['total_pemasukan'] = $this->modelapp->getData('SUM(total_harga) as total', 'pemasukan', ['MONTH(tgl_buat)' => date('m')])->row_array();
-            $data['approve_bayar'] = $this->modelapp->getData("*", "tbl_detail_pembayaran", ["status_owner" => "0"])->result();
 
             $this->load->view('partials/part_navbar', $data);
             $this->load->view('partials/part_sidebar', $data);

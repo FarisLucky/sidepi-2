@@ -5,6 +5,9 @@
         <div class="row">
           <div class="col-sm-12">
             <h4 class="dark txt_title d-inline-block mt-2">Kartu Kontrol </h4>
+            <?php if (isset($_SESSION['kartu_kontrol'])) { ?>
+              <a href="<?= base_url('kartukontrol/resetproperti/') ?>" class="mx-2 text-primary">Pilih Properti</a>
+            <?php } ?>
           </div>
         </div>
         <hr>
@@ -77,11 +80,11 @@
                   <th>SPR</th>
                   <th>Konsumen</th>
                   <th>unit</th>
-                  <th>Tanda Jadi</th>
-                  <th>Uang Muka</th>
-                  <th>Cicilan</th>
                   <th>Status Transaksi</th>
-                  <th>Tgl Transaksi</th>
+                  <th>Status Diterima</th>
+                  <th>Diterima Oleh</th>
+                  <th>Tgl dibuat</th>
+                  <th>Pembuat</th>
                   <th>Aksi</th>
                 </thead>
                 <tbody>
@@ -95,12 +98,18 @@
                       <td><?= $value['no_spr'] ?></td>
                       <td><?= $value['nama_lengkap'] ?></td>
                       <td><?= $value['nama_unit'] ?></td>
-                      <td><span class="badge badge-success"><?= $value['status_tj'] == 'bs' ? 'belum selesai' : 'selesai' ?></span></td>
-                      <td><span class="badge badge-warning"><?= $value['status_um'] == 'bs' ? 'belum selesai' : 'selesai' ?></span></td>
-                      <td><span class="badge badge-info"><?= $value['status_ccl'] == 'bs' ? 'belum selesai' : 'selesai' ?></span></td>
-                      <td><span class="badge badge-primary"><?= $value['status_transaksi'] == 's' ? 'sementara' : ($value['status_transaksi'] == 'p' ? 'pending' : 'selesai') ?></span></td>
+                      <td><span class="badge badge-primary"><?= $value['status_transaksi'] == '0' ? 'proses' : 'selesai'; ?></span></td>
+                      <td><span class="badge badge-success"><?= $value['status_diterima'] == 'terima' ? 'diterima' : 'ditolak' ?></span></td>
+                      <td><?= $value['nama_penerima'] ?></td>
                       <td><?= date('d-m-Y', strtotime($value['tgl_transaksi'])) ?></td>
-                      <td><a href="<?= base_url("kartukontrol/detail/" . $value['id_transaksi']) ?>" class="btn btn-icons btn-inverse-info"><i class="fa fa-info"></i></a></td>
+                      <td><?= $value['nama_pembuat'] ?></td>
+                      <td>
+                        <a href="<?= base_url("kartukontrol/detail/" . $value['id_transaksi']) ?>" class="btn btn-icons btn-inverse-info"><i class="fa fa-info"></i></a>
+                        <button class="btn btn-icons btn-inverse-danger" onclick="deleteItem('<?= base_url('kartukontrol/hapus/' . $value['id_transaksi']) ?>','hapus')"><i class="fa fa-trash"></i></button>
+                        <?php if ($value['status_diterima'] == 'tolak') { ?>
+                          <button class="btn btn-sm btn-danger alasan_kartu_kontrol" data-id="<?= $value['id_transaksi'] ?>">alasan</button>
+                        <?php } ?>
+                      </td>
                     </tr>
                   <?php } ?>
                 </tbody>
@@ -113,6 +122,22 @@
             <?php echo $this->pagination->create_links(); ?>
           </nav>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal_kontrol">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Alasan Ditolak</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="body-modal">/p>
       </div>
     </div>
   </div>

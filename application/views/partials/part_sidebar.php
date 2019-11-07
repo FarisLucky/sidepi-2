@@ -274,12 +274,6 @@ $nama_path = $this->uri->segment('1'); ?>
                             </li>
                         <?php } ?>
 
-                        <?php if (in_array('listtransaksi', $_SESSION['controllers'])) { ?>
-                            <li class="nav-item">
-                                <a class="nav-link <?= $nama_path == 'listtransaksi' ? 'active' : '' ?>" href="<?= base_url('listtransaksi') ?>">Laporan Transaksi</a>
-                            </li>
-                        <?php } ?>
-
                         <?php if (in_array('laporanmarketing', $_SESSION['controllers'])) { ?>
                             <li class="nav-item">
                                 <a class="nav-link <?= $nama_path == 'laporanmarketing' ? 'active' : '' ?>" href="<?= base_url('laporanmarketing') ?>">Laporan Marketing</a>

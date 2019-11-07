@@ -10,7 +10,38 @@ class Pengeluaran extends CI_Controller
 		$this->load->library('form_validation');
 		$this->load->helper('date');
 	}
-	public function index($num = 0)
+	public function index()
+	{
+		if (isset($_SESSION['id_properti']) || isset($_SESSION['pengeluaran'])) {
+			redirect('pengeluaran/item');
+			exit();
+		}
+		$data['title'] = 'Pengeluaran';
+		$data['href'] = base_url('pengeluaran/coreauth');
+		$data['properti'] = $this->modelapp->getData('id_properti,nama_properti', 'properti')->result_array();
+		$this->pages('auth_laporan/auth_laporan', $data);
+	}
+
+	public function coreAuth()
+	{
+		$properti = $this->input->post('properti', true);
+		if (!empty($properti)) {
+			$session = ['pengeluaran' => $properti];
+			$this->session->set_userdata($session);
+			redirect('pengeluaran/item', 'refresh');
+		} else {
+			redirect('pengeluaran');
+		}
+	}
+	public function resetProperti()
+	{
+		if (isset($_SESSION['pengeluaran'])) {
+			$session = ['pengeluaran', 'search'];
+			$this->session->unset_userdata($session);
+		}
+		redirect('pengeluaran');
+	}
+	public function item($num = 0)
 	{
 		$data["title"] = "Pengeluaran";
 		$per_page = 10;
@@ -28,7 +59,14 @@ class Pengeluaran extends CI_Controller
 		if ($num != 0) {
 			$num = ($num - 1) * $per_page;
 		}
-		$data['pengeluaran'] = $this->modelapp->getDataLike("*", "tbl_pengeluaran", $search, 'id_pengeluaran', 'DESC ', $per_page, $num, ["id_properti" => $_SESSION["id_properti"]])->result();
+		$where = '';
+		if (isset($_SESSION['id_properti'])) {
+			$where = ["id_properti" => $_SESSION["id_properti"]];
+		}
+		if (isset($_SESSION['pengeluaran'])) {
+			$where = ["id_properti" => $_SESSION["pengeluaran"]];
+		}
+		$data['pengeluaran'] = $this->modelapp->getDataLike("*", "tbl_pengeluaran", $search, 'id_pengeluaran', 'DESC ', $per_page, $num, $where)->result();
 		$data['row'] = $num;
 		$this->pagination();
 		$this->pages('pengeluaran/v_pengeluaran', $data);
@@ -36,8 +74,6 @@ class Pengeluaran extends CI_Controller
 	public function tambah()
 	{
 		$data['title'] = "Tambah";
-
-		$data['img'] = getCompanyLogo();
 		$data['kelompok'] = $this->modelapp->getData('id_kelompok,nama_kelompok', 'kelompok_item', ['id_kategori' => 3, "status" => "a"])->result();
 		$data['unit'] = $this->modelapp->getData('id_unit,nama_unit', 'unit', ['id_properti' => $_SESSION['id_properti']])->result();
 		$this->pages('pengeluaran/v_tambah_pengeluaran', $data);
@@ -49,15 +85,9 @@ class Pengeluaran extends CI_Controller
 			$this->tambah();
 		} else {
 			$input = $this->inputData();
-			if (!empty($_POST['lock'])) {
-				if ($_POST['lock'] == 'l') {
-					$input += ['status_owner' => 'p', 'status_manager' => 'p'];
-				}
-			}
 			$input += [
 				'tgl_buat' => date('Y-m-d'),
 				'id_user' => $this->session->userdata("id_user"),
-				'id_properti' => $this->session->userdata('id_properti')
 			];
 			$config = $this->initImage();
 			$this->load->library('upload', $config);
@@ -109,11 +139,10 @@ class Pengeluaran extends CI_Controller
 	public function ubah($id)
 	{
 		$data['title'] = "Ubah";
-
 		$where = array('id_pengeluaran' => $id);
 		$data['img'] = getCompanyLogo();
 		$data['kelompok'] = $this->modelapp->getData('id_kelompok,nama_kelompok', 'kelompok_item', ['id_kategori' => 3, "status" => "a"])->result();
-		$data['unit'] = $this->modelapp->getData('id_unit,nama_unit', 'unit')->result();
+		$data['unit'] = $this->modelapp->getData('id_unit,nama_unit', 'unit', ['id_properti' => $_SESSION['id_properti']])->result();
 		$data['p'] = $this->modelapp->getData('*', 'pengeluaran', $where)->row();
 		$this->pages('pengeluaran/v_ubah_pengeluaran', $data);
 	}
@@ -122,6 +151,7 @@ class Pengeluaran extends CI_Controller
 		$id = $this->input->post('params', true);
 		$this->validate();
 		if ($this->form_validation->run() == false) {
+			exit();
 			$this->ubah($id);
 		} else {
 			$input = $this->inputData();
@@ -139,52 +169,37 @@ class Pengeluaran extends CI_Controller
 					$update = $this->modelapp->updateData($input, 'pengeluaran', ['id_pengeluaran' => $id]);
 					if ($update) {
 						$this->session->set_flashdata('success', 'Data berhasil diubah');
-						redirect('pemasukan/ubah/' . $id);
+						redirect('pengeluaran/ubah/' . $id);
 					} else {
 						$this->session->set_flashdata('failed', 'Data tidak ada perubahan');
-						redirect('pemasukan/ubah/' . $id);
+						redirect('pengeluaran/ubah/' . $id);
 					}
 				} else {
 					$error = $this->upload->display_errors();
 					$this->session->set_flashdata('failed', $error);
-					redirect('pemasukan/ubah/' . $id);
+					redirect('pengeluaran/ubah/' . $id);
 				}
 			} else {
 				$update = $this->modelapp->updateData($input, 'pengeluaran', ["id_pengeluaran" => $id]);
 				if ($update) {
 					$this->session->set_flashdata('success', 'Data berhasil diubah');
-					redirect('pemasukan/ubah/' . $id);
+					redirect('pengeluaran/ubah/' . $id);
 				} else {
 					$this->session->set_flashdata('failed', 'tidak ada perubahan data');
-					redirect('pemasukan/ubah/' . $id);
+					redirect('pengeluaran/ubah/' . $id);
 				}
 			}
 		}
 	}
 
-	public function lock($id)
+	public function printData($id_pengeluaran)
 	{
-		$input = $id;
-		$get_data = $this->modelapp->getData('id_pengeluaran,status_manager', 'pengeluaran', ['id_pengeluaran' => $input]);
-		if ($get_data->num_rows() > 0) {
-			$rs_pengeluaran = $get_data->row_array();
-			if ($rs_pengeluaran['status_manager'] == 'sl') {
-				$query_update = $this->modelapp->updateData(['status_owner' => 'p'], 'pengeluaran', ['id_pengeluaran' => $rs_pengeluaran['id_pengeluaran']]);
-				if ($query_update) {
-					$this->session->set_flashdata('success', 'Berhasil disimpan');
-					redirect('pengeluaran');
-				}
-			} else {
-				$query_update = $this->modelapp->updateData(['status_owner' => 'p', 'status_manager' => 'p'], 'pengeluaran', ['id_pengeluaran' => $rs_pengeluaran['id_pengeluaran']]);
-				if ($query_update) {
-					$this->session->set_flashdata('success', 'Berhasil disimpan');
-					redirect('pengeluaran');
-				}
-			}
-		} else {
-			$this->session->set_flashdata('success', 'Berhasil disimpan');
-			redirect('pengeluaran');
-		}
+		$this->load->library('Pdf');
+		$this->load->helper('date');
+		$data['img'] = getCompanyLogo();
+		$where = ["id_pengeluaran" => $id_pengeluaran];
+		$data['detail_bayar'] = $this->modelapp->getData("*", "tbl_pengeluaran", $where)->row_array();
+		$this->pdf->load_view('Pengeluaran', 'print/print_pengeluaran', $data);
 	}
 
 	private function validate()
@@ -221,9 +236,9 @@ class Pengeluaran extends CI_Controller
 		$config['upload_path'] = './assets/uploads/images/pengeluaran/';
 		$config['allowed_types'] = 'jpg|jpeg|png';
 		$config['encrypt_name'] = true;
-		$config['max_size']  = '1024';
-		$config['max_width']  = '1024';
-		$config['max_height']  = '768';
+		$config['max_size']  = '200';
+		$config['max_width']  = '400';
+		$config['max_height']  = '400';
 		return $config;
 	}
 	private function pagination()
@@ -255,5 +270,13 @@ class Pengeluaran extends CI_Controller
 		$config['num_tag_close'] = '</span></li>';
 
 		$this->pagination->initialize($config);
+	}
+	public function dataTolak()
+	{
+		$data = $this->input->post('data', true);
+		if (!empty($data)) {
+			$query = $this->modelapp->getData('deskripsi_tolak', 'pengeluaran', ['id_pengeluaran' => $data])->row_array();
+			echo json_encode(['status' => true, 'data' => $query]);
+		}
 	}
 }

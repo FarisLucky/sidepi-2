@@ -427,7 +427,6 @@ class Transaksi extends CI_Controller
             "total_tanda_jadi" => str_replace('.', '', $this->input->post('txt_tanda_jadi', true)),
             'type_bayar' => $this->input->post('txt_type_pembayaran', true),
             'status_transaksi' => "0",
-            'kunci' => 'u',
             'tgl_tanda_jadi' => $this->input->post('tgl_tanda_jadi', true),
             'tgl_uang_muka' => $this->input->post('tgl_uang_muka', true),
             'tgl_cicilan' => $this->input->post('tgl_pembayaran', true),

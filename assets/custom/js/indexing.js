@@ -1,11 +1,5 @@
 // Doc Ready
 $(function () {
-  let href = window.location.pathname.split('/');
-  console.log(
-    href[2]
-  );
-  let data = $('a.nav-link').attr('href').split('/');
-  console.log(data[4] === href[2] ? 'berhil' : data);
   inputPaste("input[name='auth_pass']");
   const error = $(".flash-data").attr("flash-error");
   const success = $(".flash-data").attr("flash-success");
@@ -43,15 +37,6 @@ $(function () {
   if ($("textarea[name='txt_spr']").length > 0) {
     CKEDITOR.replace("txt_spr");
   }
-  // Last Properti
-
-  // RAB Controller Javascript
-
-  // Last Controller Javascript
-
-  // Unit Controller
-
-  // Last Controller Unit
 
   // Transaksi Controller
   let kesepakatan = document.getElementById("txt_kesepakatan");
@@ -66,6 +51,50 @@ $(function () {
       tanda_jadi.value = formatRupiah(this.value, "Rp. ");
     });
   }
+  $("#select_konsumen").change(function (e) {
+    e.preventDefault();
+    let id = $(this).val();
+    if (id == "") {
+      $("input[name='txt_card']").val("");
+      $("input[name='txt_telp']").val("");
+      $("input[name='txt_email']").val("");
+      $("input[name='txt_alamat']").val("");
+    } else {
+      ajaxReq(
+        "POST",
+        "datakonsumen", {
+          id,
+          id_tkn: csrf_value
+        },
+        function (response) {
+          if (response.success == true) {
+            $("input[name='txt_card']").val(response.obj.id_card);
+            $("input[name='txt_telp']").val(response.obj.telp);
+            $("input[name='txt_email']").val(response.obj.email);
+            $("input[name='txt_alamat']").val(response.obj.alamat);
+          }
+        }
+      );
+    }
+  });
+
+  $('.alasan').click(function (e) { 
+    e.preventDefault();
+    let data = $(this).attr('data-id');
+    ajaxReq(
+      "POST",
+      base+"transaksi/datatolak", {
+        data,
+        id_tkn: csrf_value
+      },
+      function (response) {
+        if (response.status == true) {
+          $('#modal .body-modal').html(response.data.deskripsi_tolak);
+          $('#modal').modal('show');
+        }
+      }
+    );
+  });
   $("#select_konsumen").change(function (e) {
     e.preventDefault();
     let id = $(this).val();
@@ -151,6 +180,7 @@ $(function () {
     }
     $(".bayar").after(form);
   });
+
   $("#lock_kesepakatan").on("click", function (e) {
     e.preventDefault();
     let harga;
@@ -249,7 +279,6 @@ $(function () {
     let cicilan;
     let value = parseInt($("#periode_bayar").val());
     let type = $("#txt_type_pembayaran").val();
-    console.log(type);
     if ($("button.locked_tanda_jadi").length < 1) {
       toastr.remove();
       toastr.error("Tanda Jadi belum di kunci");
@@ -344,6 +373,66 @@ $(function () {
         window.location = url;
       }
     });
+  });
+  
+  $('.modal_tolak').on('click',function (e) { 
+    e.preventDefault();
+    let data = $(this).attr('data-id');
+      if (data !== '') {
+        $('#modal #input_hidden').val(data);
+        $('#modal').modal('show');
+    }
+  });
+  $('.alasan_di_history').click(function (e) { 
+    e.preventDefault();
+    let data = $(this).attr('data-id');
+    ajaxReq(
+      "POST",
+      base+"pembayaran/datatolak", {
+        data,
+        id_tkn: csrf_value
+      },
+      function (response) {
+        if (response.status == true) {
+          $('#modal_history .body-modal').html(response.data.deskripsi_tolak);
+          $('#modal_history').modal('show');
+        }
+      }
+    );
+  });
+  $('.alasan_pengeluaran').click(function (e) { 
+    e.preventDefault();
+    let data = $(this).attr('data-id');
+    ajaxReq(
+      "POST",
+      base+"pengeluaran/datatolak", {
+        data,
+        id_tkn: csrf_value
+      },
+      function (response) {
+        if (response.status == true) {
+          $('#modal_history .body-modal').html(response.data.deskripsi_tolak);
+          $('#modal_history').modal('show');
+        }
+      }
+    );
+  });
+  $('.alasan_kartu_kontrol').click(function (e) { 
+    e.preventDefault();
+    let data = $(this).attr('data-id');
+    ajaxReq(
+      "POST",
+      base+"kartukontrol/datatolak", {
+        data,
+        id_tkn: csrf_value
+      },
+      function (response) {
+        if (response.status == true) {
+          $('#modal_kontrol .body-modal').html(response.data.deskripsi_tolak);
+          $('#modal_kontrol').modal('show');
+        }
+      }
+    );
   });
 });
 
@@ -564,25 +653,6 @@ function formatRupiah(angka, prefix) {
 
   rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
   return prefix == undefined ? rupiah : rupiah ? rupiah : "";
-}
-
-function cloneForm(params) {
-  event.preventDefault();
-  let clone = $(params).clone();
-  $(clone).insertAfter(params);
-}
-
-function removeClone(selector, form) {
-  event.preventDefault();
-  if ($(form).length > 1) {
-    let total = 0;
-    $(selector)
-      .closest(form)
-      .remove();
-  } else {
-    toastr.remove();
-    toastr.info("tidak dapat dihapus");
-  }
 }
 
 function changeData(type, url, selector, place) {
