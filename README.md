@@ -1,2 +1,2 @@
 # sidepi-2
-Project ini sudah tidak lagi menggunakan datatables 
+Sistem Developer properti with real world studi cases
